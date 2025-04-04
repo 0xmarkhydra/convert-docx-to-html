@@ -1,0 +1,12 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+.DS_Store
+tmp
+extracted
+output
+*.zip
+Dockerfile
+.dockerignore
+README.md 
