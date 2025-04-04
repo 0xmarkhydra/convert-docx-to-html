@@ -46,35 +46,58 @@ cron.schedule('*/5 * * * *', () => {
   console.log('Running cleanup job for tmp directory...');
   const tmpDir = path.join(__dirname, 'tmp');
   
-  fs.readdir(tmpDir, (err, files) => {
-    if (err) {
-      console.error('Error reading tmp directory:', err);
+  // Create recursive function to clean directories
+  const cleanDirectory = (dirPath) => {
+    if (!fs.existsSync(dirPath)) {
+      console.log(`Directory does not exist: ${dirPath}`);
       return;
     }
     
-    // Delete each file in the tmp directory
-    files.forEach(file => {
-      const filePath = path.join(tmpDir, file);
+    try {
+      const files = fs.readdirSync(dirPath);
       
-      fs.stat(filePath, (err, stats) => {
-        if (err) {
-          console.error(`Error getting stats for file ${file}:`, err);
-          return;
-        }
+      files.forEach(file => {
+        const filePath = path.join(dirPath, file);
         
-        // If it's a file, delete it
-        if (stats.isFile()) {
-          fs.unlink(filePath, err => {
-            if (err) {
-              console.error(`Error deleting file ${file}:`, err);
-            } else {
-              console.log(`Deleted tmp file: ${file}`);
+        try {
+          const stats = fs.statSync(filePath);
+          const now = new Date().getTime();
+          const fileAge = now - stats.mtime.getTime();
+          const fileAgeMinutes = fileAge / (1000 * 60);
+          
+          // Only delete files older than 30 minutes
+          if (fileAgeMinutes > 30) {
+            if (stats.isDirectory()) {
+              // Clean directory contents first, then remove directory
+              cleanDirectory(filePath);
+              try {
+                fs.rmdirSync(filePath);
+                console.log(`Deleted tmp directory: ${file}`);
+              } catch (rmErr) {
+                // Directory might not be empty or might be in use
+                console.log(`Could not remove directory ${file}: ${rmErr.message}`);
+              }
+            } else if (stats.isFile()) {
+              try {
+                fs.unlinkSync(filePath);
+                console.log(`Deleted tmp file: ${file}`);
+              } catch (unlinkErr) {
+                // File might be in use
+                console.log(`Could not delete file ${file}: ${unlinkErr.message}`);
+              }
             }
-          });
+          }
+        } catch (statErr) {
+          console.error(`Error getting stats for ${file}: ${statErr.message}`);
         }
       });
-    });
-  });
+    } catch (readErr) {
+      console.error(`Error reading directory ${dirPath}: ${readErr.message}`);
+    }
+  };
+  
+  // Start the cleaning process
+  cleanDirectory(tmpDir);
 });
 
 /**
