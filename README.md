@@ -209,6 +209,32 @@ html-converter-api/
 docker-compose up -d
 ```
 
+## Triển khai trên Railway
+
+Để triển khai dự án này trên Railway, hãy làm theo các bước sau:
+
+1. Đăng ký tài khoản trên [Railway](https://railway.app/)
+2. Kết nối repository của bạn với Railway 
+3. Railway sẽ tự động phát hiện Dockerfile và triển khai ứng dụng
+4. Bạn có thể thêm biến môi trường trong phần "Variables" của dự án Railway
+
+Các bước triển khai thủ công:
+```bash
+# Cài đặt Railway CLI
+npm i -g @railway/cli
+
+# Đăng nhập
+railway login
+
+# Khởi tạo dự án
+railway init
+
+# Triển khai
+railway up
+```
+
+Ứng dụng của bạn sẽ được triển khai tự động mỗi khi bạn push code lên repository đã kết nối.
+
 ## License
 
 ISC # convert-docx-to-html

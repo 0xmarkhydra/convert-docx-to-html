@@ -9,7 +9,7 @@ COPY package*.json ./
 RUN npm install --production
 
 # Copy application code
-COPY api.js swagger.js html_processor.js process.js docx_converter.js ./
+COPY api.js swagger.js html_processor.js docx_converter.js ./
 COPY public ./public
 
 # Create tmp directory for file uploads
